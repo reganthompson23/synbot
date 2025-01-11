@@ -4,6 +4,7 @@
   "description": "AI-powered shopping assistant for Shopify stores",
   "dependencies": {
     "openai": "^4.0.0",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "csv-parser": "^3.0.0"
   }
 } 

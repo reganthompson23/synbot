@@ -1,5 +1,7 @@
 const { Configuration, OpenAIApi } = require('openai');
-const products = require('./products.json');
+const csv = require('csv-parser');
+const fs = require('fs');
+const path = require('path');
 
 // Initialize OpenAI
 const configuration = new Configuration({
@@ -12,24 +14,48 @@ function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, '') : '';
 }
 
+// Function to read CSV file
+async function readProducts() {
+  const products = [];
+  return new Promise((resolve, reject) => {
+    fs.createReadStream(path.join(__dirname, '../../data/products_export_1 (5).csv'))
+      .pipe(csv())
+      .on('data', (data) => {
+        products.push({
+          title: data.Title,
+          body: data['Body (HTML)'],
+          vendor: data.Vendor,
+          price: data['Variant Price'],
+          specifications: data['Specifications (product.metafields.my_fields.specifications)']
+        });
+      })
+      .on('end', () => resolve(products))
+      .on('error', (error) => reject(error));
+  });
+}
+
 // Function to find relevant products
-function findRelevantProducts(query) {
+async function findRelevantProducts(query) {
+  const products = await readProducts();
   return products.filter(product => {
-    // Create searchable text from only the fields we care about
+    // Create searchable text from all fields
     const searchableText = [
       product.title,
       stripHtml(product.body),
+      product.vendor,
       product.specifications
     ]
-      .filter(Boolean) // Remove any undefined/null values
+      .filter(Boolean)
       .join(' ')
       .toLowerCase();
 
     return searchableText.includes(query.toLowerCase());
   }).slice(0, 3).map(product => {
-    // Return only the fields we want to show in responses
+    // Return formatted product data
     return {
       title: product.title,
+      brand: product.vendor,
+      price: product.price,
       description: stripHtml(product.body),
       specifications: product.specifications
     };
@@ -49,7 +75,7 @@ exports.handler = async function(event, context) {
     const { message } = JSON.parse(event.body);
     
     // Find relevant products
-    const relevantProducts = findRelevantProducts(message);
+    const relevantProducts = await findRelevantProducts(message);
     
     if (relevantProducts.length === 0) {
       return {
@@ -68,7 +94,7 @@ Customer question: ${message}
 Relevant products:
 ${JSON.stringify(relevantProducts, null, 2)}
 
-Please provide a natural, helpful response based only on this product information. If there are specifications available, make sure to mention relevant ones in your response.`;
+Please provide a natural, helpful response based only on this product information. If there are specifications available, make sure to mention relevant ones in your response. Always include the price when discussing products.`;
 
     // Get response from OpenAI
     const completion = await openai.createChatCompletion({
