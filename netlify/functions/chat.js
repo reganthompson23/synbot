@@ -3,7 +3,7 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const path = require('path');
 
-// Initialize OpenAI
+// Initialize OpenAI with API key from environment variables
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
