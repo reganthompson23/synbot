@@ -30,14 +30,14 @@ exports.handler = async function(event, context) {
     const { message } = JSON.parse(event.body);
     const products = await readProducts();
     
-    const prompt = `You are a helpful shopping assistant. Here is the customer's question and our product catalog. Please answer their question based on the product information provided.
+    const prompt = `You are a helpful shopping assistant. Here is the customer's question and our complete product catalog. Please answer their question based on the product information provided.
 
 Customer question: ${message}
 
 Product catalog:
-${JSON.stringify(products.slice(0, 5), null, 2)}
+${JSON.stringify(products, null, 2)}
 
-Please provide a natural, helpful response based only on this product information. Always include prices when discussing specific products.`;
+Please provide a natural, helpful response based on the complete product catalog. Always include prices when discussing specific products. If multiple products match the query, mention the options available.`;
 
     const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
@@ -46,7 +46,7 @@ Please provide a natural, helpful response based only on this product informatio
         { role: "user", content: prompt }
       ],
       temperature: 0.7,
-      max_tokens: 150
+      max_tokens: 250
     });
 
     return {
