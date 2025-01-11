@@ -1,11 +1,20 @@
 const { Configuration, OpenAIApi } = require('openai');
-const products = require('./products.json');
 
 // Initialize OpenAI
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
+
+// Hardcode products array (we'll replace this with your actual product data)
+const products = [
+  {
+    name: "Sample Product",
+    description: "This is a sample product",
+    price: "$99.99"
+  }
+  // You can paste your actual product data here
+];
 
 // Function to find relevant products
 function findRelevantProducts(query) {
