@@ -1,4 +1,5 @@
 const { Configuration, OpenAIApi } = require('openai');
+const products = require('./products.json');
 
 // Initialize OpenAI
 const configuration = new Configuration({
@@ -6,23 +7,33 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-// Hardcode products array (we'll replace this with your actual product data)
-const products = [
-  {
-    name: "Sample Product",
-    description: "This is a sample product",
-    price: "$99.99"
-  }
-  // You can paste your actual product data here
-];
+// Function to clean HTML content
+function stripHtml(html) {
+  return html ? html.replace(/<[^>]*>/g, '') : '';
+}
 
 // Function to find relevant products
 function findRelevantProducts(query) {
-  // Simple search implementation
   return products.filter(product => {
-    const searchText = Object.values(product).join(' ').toLowerCase();
-    return searchText.includes(query.toLowerCase());
-  }).slice(0, 3); // Return top 3 matches
+    // Create searchable text from only the fields we care about
+    const searchableText = [
+      product.title,
+      stripHtml(product.body),
+      product.specifications
+    ]
+      .filter(Boolean) // Remove any undefined/null values
+      .join(' ')
+      .toLowerCase();
+
+    return searchableText.includes(query.toLowerCase());
+  }).slice(0, 3).map(product => {
+    // Return only the fields we want to show in responses
+    return {
+      title: product.title,
+      description: stripHtml(product.body),
+      specifications: product.specifications
+    };
+  });
 }
 
 exports.handler = async function(event, context) {
@@ -57,7 +68,7 @@ Customer question: ${message}
 Relevant products:
 ${JSON.stringify(relevantProducts, null, 2)}
 
-Please provide a natural, helpful response based only on this product information.`;
+Please provide a natural, helpful response based only on this product information. If there are specifications available, make sure to mention relevant ones in your response.`;
 
     // Get response from OpenAI
     const completion = await openai.createChatCompletion({
