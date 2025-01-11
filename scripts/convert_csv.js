@@ -4,7 +4,7 @@ const path = require('path');
 
 const results = [];
 
-fs.createReadStream('../data/products_export_1 (5).csv')
+fs.createReadStream(path.join(__dirname, '../data/products_export_1 (5).csv'))
   .pipe(csv())
   .on('data', (data) => results.push(data))
   .on('end', () => {
