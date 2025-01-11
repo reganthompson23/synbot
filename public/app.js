@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to send message to backend
     async function sendMessage(message) {
         try {
-            const response = await fetch('/api/chat', {
+            const response = await fetch('/.netlify/functions/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

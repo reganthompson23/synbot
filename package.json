@@ -1,0 +1,13 @@
+{
+  "name": "shop-chatbot",
+  "version": "1.0.0",
+  "description": "AI-powered shopping assistant for Shopify stores",
+  "scripts": {
+    "convert": "node scripts/convert_csv.js",
+    "prebuild": "npm run convert"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "csv-parser": "^3.0.0"
+  }
+} 
