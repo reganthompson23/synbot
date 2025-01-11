@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "AI-powered shopping assistant for Shopify stores",
   "scripts": {
-    "build": "node scripts/convert_csv.js"
+    "convert": "node scripts/convert_csv.js"
   },
   "dependencies": {
     "openai": "^4.0.0",
